@@ -26,21 +26,22 @@ def first_guess_valid_guesses():
             writer = csv.writer(file)
 
             # Write the header row
-            writer.writerow(['', 'AVG'] + w.words)
+            writer.writerow(['Initial Guess', 'Remaining Valid Guesses'])
 
-            for word in (wbar := tqdm.tqdm(w.words)):
-                wbar.set_postfix_str(word)
-                row = [word,0]
-                for guess in (gbar := tqdm.tqdm(w.words, leave=False)):
-                    gbar.set_postfix_str(guess)
+            for guess in (gbar := tqdm.tqdm(w.valid_guesses)):
+                gbar.set_postfix_str(guess)
+                row = [guess,0]
+                for word in (wbar := tqdm.tqdm(w.words, leave=False)):
+                    wbar.set_postfix_str(word)
                     w.reset(hard_mode=True, word=word)
                     w.guess(guess)
                     if w.status() is True:
                         row.append(0)
                     else:
-                        row.append(len(w.valid_guesses))
+                        row.append(len(w.remaining_guesses))
                 row[1] = sum(row[2:])/len(row[2:])
-                writer.writerow(row)
+                writer.writerow(row[:2])
+                file.flush()
 
 #Brute force search, seems like it will take literal years
 def brute_force():
@@ -61,7 +62,7 @@ def brute_force():
                     continue
                 for guess2 in (
                     g2bar := tqdm.tqdm(
-                        [guess for guess in w.valid_guesses if guess not in w.guesses],
+                        [guess for guess in w.remaining_guesses if guess not in w.guesses],
                         leave=False,
                     )
                 ):
@@ -76,7 +77,7 @@ def brute_force():
                         g3bar := tqdm.tqdm(
                             [
                                 guess
-                                for guess in w.valid_guesses
+                                for guess in w.remaining_guesses
                                 if guess not in w.guesses
                             ],
                             leave=False,
@@ -94,7 +95,7 @@ def brute_force():
                             g4bar := tqdm.tqdm(
                                 [
                                     guess
-                                    for guess in w.valid_guesses
+                                    for guess in w.remaining_guesses
                                     if guess not in w.guesses
                                 ],
                                 leave=False,
@@ -113,7 +114,7 @@ def brute_force():
                                 g5bar := tqdm.tqdm(
                                     [
                                         guess
-                                        for guess in w.valid_guesses
+                                        for guess in w.remaining_guesses
                                         if guess not in w.guesses
                                     ],
                                     leave=False,
@@ -138,7 +139,7 @@ def brute_force():
                                 w.guess(guess4)
                                 w.guess(guess5)
                                 score[guess1][5] += 1
-                                score[guess1][6] += len(w.valid_guesses) - 1
+                                score[guess1][6] += len(w.remaining_guesses) - 1
 
         with open('results.csv', 'w', newline='') as file:
             # Create a CSV writer object
