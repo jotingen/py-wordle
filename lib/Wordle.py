@@ -37,6 +37,8 @@ class Wordle:
 
         self.remaining_guesses = self.valid_guesses.copy()
 
+        self.remaining_words = self.words.copy()
+
     def reset(
         self,
         word: str = "",
@@ -57,6 +59,8 @@ class Wordle:
 
         self.remaining_guesses = self.valid_guesses.copy()
 
+        self.remaining_words = self.words.copy()
+
     def guess(self, guess: str):
         if guess not in self.valid_guesses:
             raise Exception("Guess not in guess list")
@@ -75,6 +79,9 @@ class Wordle:
                     self.remaining_guesses = [
                         k for k in self.remaining_guesses if k[n] == self.word[n]
                     ]
+                    self.remaining_words = [
+                        k for k in self.remaining_words if k[n] == self.word[n]
+                    ]
 
         # Check if contains
         for n in range(5):
@@ -88,6 +95,11 @@ class Wordle:
                             self.remaining_guesses = [
                                 k
                                 for k in self.remaining_guesses
+                                if guess[n] in k and k[n] != self.word[w]
+                            ]
+                            self.remaining_words = [
+                                k
+                                for k in self.remaining_words
                                 if guess[n] in k and k[n] != self.word[w]
                             ]
 

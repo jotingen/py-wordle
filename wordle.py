@@ -26,21 +26,24 @@ def first_guess_valid_guesses():
             writer = csv.writer(file)
 
             # Write the header row
-            writer.writerow(['Initial Guess', 'Remaining Valid Guesses'])
+            writer.writerow(['Initial Guess', 'Remaining Valid Guesses', 'Remaining Valid Solutions'])
 
             for guess in (gbar := tqdm.tqdm(w.valid_guesses)):
                 gbar.set_postfix_str(guess)
-                row = [guess,0]
+                row = [guess]
                 for word in (wbar := tqdm.tqdm(w.words, leave=False)):
                     wbar.set_postfix_str(word)
                     w.reset(hard_mode=True, word=word)
                     w.guess(guess)
                     if w.status() is True:
                         row.append(0)
+                        row.append(0)
                     else:
                         row.append(len(w.remaining_guesses))
-                row[1] = sum(row[2:])/len(row[2:])
-                writer.writerow(row[:2])
+                        row.append(len(w.remaining_words))
+                row[1] = sum(row[3::2])/len(row[3::2])
+                row[2] = sum(row[4::2])/len(row[4::2])
+                writer.writerow(row[:3])
                 file.flush()
 
 #Brute force search, seems like it will take literal years
