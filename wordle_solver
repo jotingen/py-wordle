@@ -1,0 +1,30 @@
+import lib.Wordle as Wordle
+
+def main():
+    
+    num = 1
+    w = Wordle.Game(hard_mode=True)
+    s = Wordle.GameState(hard_mode=True)
+    guess: str = "uraei"
+    print(num, guess)
+    state = w.guess(guess)
+    print(' ', state)
+    s.update(guess=guess, state=state)
+    num += 1
+
+    while(w.status() is None):
+        guess= s.next_best_guess()
+        print(num, guess)
+        state = w.guess(guess)
+        print(' ', state)
+        s.update(guess=guess, state=state)
+        num += 1
+
+    if w.status():
+        print("Success")
+    else:
+        print("Failed ", w.word)
+
+
+if __name__ == "__main__":
+    main()

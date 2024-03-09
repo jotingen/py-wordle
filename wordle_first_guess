@@ -1,0 +1,47 @@
+import csv
+import tqdm
+
+from wakepy import keep
+
+import lib.Wordle as Wordle
+
+
+def main():
+    first_guess_valid_guesses()
+
+#Make a table of the # of valid guesses after the first guess, average out to see what gives the fewest
+def first_guess_valid_guesses():
+    w = Wordle.Game(hard_mode=True)
+    #w.words = random.sample(w.words, 50)
+    score = {}
+    for word in w.words:
+        score[word] = {}
+    with keep.running():
+
+        with open('results.csv', 'w', newline='') as file:
+            # Create a CSV writer object
+            writer = csv.writer(file)
+
+            # Write the header row
+            writer.writerow(['Initial Guess', 'Remaining Valid Guesses', 'Remaining Valid Solutions'])
+
+            for guess in (gbar := tqdm.tqdm(w.valid_guesses)):
+                gbar.set_postfix_str(guess)
+                row = [guess]
+                for word in (wbar := tqdm.tqdm(w.words, leave=False)):
+                    wbar.set_postfix_str(word)
+                    w.reset(hard_mode=True, word=word)
+                    w.guess(guess)
+                    if w.status() is True:
+                        row.append(0)
+                        row.append(0)
+                    else:
+                        row.append(len(w.remaining_guesses))
+                        row.append(len(w.remaining_words))
+                row[1] = sum(row[3::2])/len(row[3::2])
+                row[2] = sum(row[4::2])/len(row[4::2])
+                writer.writerow(row[:3])
+                file.flush()
+
+if __name__ == "__main__":
+    main()
