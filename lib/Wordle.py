@@ -49,6 +49,7 @@ class GameState:
             else:
                 raise Exception("Invalid state given")
         self.state.append(update_state)
+        #print(self.state)
 
     def next_best_guess(self) -> str:
 
@@ -74,8 +75,8 @@ class GameState:
             
         #print(results)
 
-        # For now pick the one with the least remaining guesses
-        return [k for k, v in results.items() if v == min(results.values())][0]
+        # For now pick the one with the least remaining guesses, and most unique letters
+        return sorted([k for k, v in results.items() if v == min(results.values())], key=lambda x: len(set(x)), reverse=True)[0]
 
 
 
@@ -142,7 +143,6 @@ class Game:
 
         guess_state: list[dict[str, str]] = [{}, {}, {}, {}, {}]
         guess_char_used = [False, False, False, False, False]
-        word_char_used = [False, False, False, False, False]
 
         # Check if is
         for n in range(5):
@@ -161,10 +161,9 @@ class Game:
         for n in range(5):
             if not guess_char_used[n]:
                 for w in range(5):
-                    if guess[n] == self.word[w] and not word_char_used[w]:
+                    if guess[n] == self.word[w] and not guess_char_used[w]:
                         guess_state[n]["contains"] = guess[n]
                         guess_char_used[n] = True
-                        word_char_used[w] = True
                         if self.hard_mode:
                             self.remaining_guesses = [
                                 k
@@ -219,10 +218,15 @@ def word_filter(game_state: GameState):
                 words = [k for k in words if guess_state[n]['contains'] in k]
                 words = [k for k in words if k[n] != guess_state[n]['contains']]
             elif "not" in guess_state[n].keys():
-                #Skip not if letter is previously contained
+                #Skip full word compare if letter is previously is or contained
                 skip = False
+                for m in range(5):
+                    if "is" in guess_state[m].keys() and guess_state[m]["is"] == guess_state[n]['not']:
+                        words = [k for k in words if k[n] != guess_state[n]['not']]
+                        skip = True
                 for m in range(n):
                     if "contains" in guess_state[m].keys() and guess_state[m]["contains"] == guess_state[n]['not']:
+                        words = [k for k in words if k[n] != guess_state[n]['not']]
                         skip = True
                 if not skip:    
                     words = [k for k in words if guess_state[n]['not'] not in k]

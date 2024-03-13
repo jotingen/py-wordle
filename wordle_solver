@@ -2,9 +2,33 @@ import lib.Wordle as Wordle
 
 def main():
     
-    num = 1
-    w = Wordle.Game(hard_mode=True)
+    #test()
+    num = 0
     s = Wordle.GameState(hard_mode=True)
+    guess: str = "uraei"
+    print("Guess:", guess)
+    state: str = input("Result: ")
+    s.update(guess=guess, state=state)
+    print(Wordle.word_filter(s))
+
+    while(num < 6):
+        guess = s.next_best_guess()
+        print("Guess:", guess)
+        state: str = input("Result: ")
+        if state == "ggggg":
+            exit()
+        s.update(guess=guess, state=state)
+        print(Wordle.word_filter(s))
+        num += 1
+
+
+def test():
+    
+    #Note second should just be xgxxx
+    num = 1
+    w = Wordle.Game(hard_mode=True,word="pesky")
+    s = Wordle.GameState(hard_mode=True)
+
     guess: str = "uraei"
     print(num, guess)
     state = w.guess(guess)
@@ -12,18 +36,42 @@ def main():
     s.update(guess=guess, state=state)
     num += 1
 
-    while(w.status() is None):
-        guess= s.next_best_guess()
-        print(num, guess)
-        state = w.guess(guess)
-        print(' ', state)
-        s.update(guess=guess, state=state)
-        num += 1
+    guess= "beech"
+    print(num, guess)
+    state = w.guess(guess)
+    print(' ', state)
+    s.update(guess=guess, state=state)
+    num += 1
 
-    if w.status():
-        print("Success")
-    else:
-        print("Failed ", w.word)
+    if state != "xgxxx":
+        raise Exception("Bad status")
+
+
+    #heave
+    #Enter Guess:uraei
+    #Enter Result:xxgyx
+    #Next Guess: abase
+    #Enter Result:xxgxg
+    #Crashes
+    num = 1
+    w = Wordle.Game(hard_mode=True,word="heave")
+    s = Wordle.GameState(hard_mode=True)
+
+    guess: str = "uraei"
+    print(num, guess)
+    state = w.guess(guess)
+    print(' ', state)
+    s.update(guess=guess, state=state)
+    num += 1
+
+    guess= "abase"
+    print(num, guess)
+    state = w.guess(guess)
+    print(' ', state)
+    s.update(guess=guess, state=state)
+    num += 1
+
+
 
 
 if __name__ == "__main__":
